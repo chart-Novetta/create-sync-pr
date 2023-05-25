@@ -46,7 +46,7 @@ async function run() {
 
         if(reviewers)
         {
-          await oktokit.pulls.requestReviewers({
+          await octokit.pulls.requestReviewers({
             owner: repository.owner.login,
             repo: repository.name,
             pull_number: pullRequest.number,
