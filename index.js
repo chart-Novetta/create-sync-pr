@@ -7,6 +7,7 @@ async function run() {
     const sourceBranch = core.getInput("SOURCE_BRANCH", { required: true });
     const targetBranches = core.getInput("TARGET_BRANCH", { required: true });
     const githubToken = core.getInput("GITHUB_TOKEN", { required: true });
+    const reviewers = core.getInput("REVIEWERS", { required: false });
 
     const targetBranchesArray = targetBranches.split(",");
 
@@ -38,10 +39,20 @@ async function run() {
           repo: repository.name,
           head: newBranch,
           base: branch,
-          title: `sync: ${branch}  with ${newBranch}`,
-          body: `sync-branches: syncing branch with ${newBranch}`,
+          title: `Merges ${branch} into ${newBranch}`,
+          body: `Merges ${newBranch} (${branch}) into ${newBranch}`,
           draft: false,
         });
+
+        if(reviewers)
+        {
+          await oktokit.pulls.requestReviewers({
+            owner: repository.owner.login,
+            repo: repository.name,
+            pull_number: pullRequest.number,
+            reviewers: (reviewers || "").trim().split(/\s*,\s*/),
+          });
+        }
 
         console.log(
           `Pull request (${pullRequest.number}) successful! You can view it here: ${pullRequest.url}.`
